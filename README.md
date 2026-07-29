@@ -42,7 +42,7 @@ from a request by using the `Verify` middleware instantiator directly. The defau
 
 # Usage
 
-See the full [example](https://github.com/go-chi/jwtauth/blob/master/_example/main.go).
+See the full [example](https://github.com/OpenCHAMI/jwtauth/blob/master/_example/main.go).
 
 ```go
 package main
@@ -51,8 +51,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/OpenCHAMI/jwtauth/v5"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/jwtauth/v5"
 )
 
 var tokenAuth *jwtauth.JWTAuth
@@ -118,5 +118,5 @@ Output: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMTF9._cLJn0xFS0Mdr
 
 [MIT](/LICENSE)
 
-[godoc]: https://godoc.org/github.com/go-chi/jwtauth
-[godoc widget]: https://godoc.org/github.com/go-chi/jwtauth?status.svg
+[godoc]: https://pkg.go.dev/github.com/OpenCHAMI/jwtauth/v5
+[godoc widget]: https://pkg.go.dev/badge/github.com/OpenCHAMI/jwtauth/v5.svg
