@@ -3,7 +3,7 @@ module github.com/OpenCHAMI/jwtauth/v5
 go 1.25.0
 
 require (
-	github.com/go-chi/chi/v5 v5.2.2
+	github.com/go-chi/chi/v5 v5.2.4
 	github.com/lestrrat-go/jwx/v2 v2.0.21
 )
 
