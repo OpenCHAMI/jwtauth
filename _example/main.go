@@ -63,7 +63,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/OpenCHAMI/jwtauth/v5"
+	"github.com/OpenCHAMI/jwtauth/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 )
