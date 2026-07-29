@@ -2,16 +2,15 @@ package jwtauth
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/lestrrat-go/jwx/v3/jwa"
+	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 type JWTAuth struct {
@@ -38,8 +37,13 @@ var (
 )
 
 func New(alg string, signKey interface{}, verifyKey interface{}, validateOptions ...jwt.ValidateOption) *JWTAuth {
+	signatureAlg, ok := jwa.LookupSignatureAlgorithm(alg)
+	if !ok {
+		signatureAlg = jwa.NewSignatureAlgorithm(alg)
+	}
+
 	ja := &JWTAuth{
-		alg:             jwa.SignatureAlgorithm(alg),
+		alg:             signatureAlg,
 		signKey:         signKey,
 		verifyKey:       verifyKey,
 		validateOptions: validateOptions,
@@ -55,8 +59,7 @@ func New(alg string, signKey interface{}, verifyKey interface{}, validateOptions
 }
 
 func NewKeySet(keySet []byte) (*JWTAuth, error) {
-	ks := jwk.NewSet()
-	err := json.Unmarshal(keySet, &ks)
+	ks, err := jwk.Parse(keySet)
 	if err != nil {
 		return nil, err
 	}
@@ -174,11 +177,11 @@ func (ja *JWTAuth) parse(payload []byte) (jwt.Token, error) {
 // jwt library
 func ErrorReason(err error) error {
 	switch {
-	case errors.Is(err, jwt.ErrTokenExpired()), err == ErrExpired:
+	case errors.Is(err, jwt.TokenExpiredError()), err == ErrExpired:
 		return ErrExpired
-	case errors.Is(err, jwt.ErrInvalidIssuedAt()), err == ErrIATInvalid:
+	case errors.Is(err, jwt.InvalidIssuedAtError()), err == ErrIATInvalid:
 		return ErrIATInvalid
-	case errors.Is(err, jwt.ErrTokenNotYetValid()), err == ErrNBFInvalid:
+	case errors.Is(err, jwt.TokenNotYetValidError()), err == ErrNBFInvalid:
 		return ErrNBFInvalid
 	default:
 		return ErrUnauthorized
@@ -224,9 +227,14 @@ func FromContext(ctx context.Context) (jwt.Token, map[string]interface{}, error)
 	var claims map[string]interface{}
 
 	if token != nil {
-		claims, err = token.AsMap(context.Background())
-		if err != nil {
-			return token, nil, err
+		keys := token.Keys()
+		claims = make(map[string]interface{}, len(keys))
+		for _, key := range keys {
+			var value interface{}
+			if err := token.Get(key, &value); err != nil {
+				return token, nil, err
+			}
+			claims[key] = value
 		}
 	} else {
 		claims = map[string]interface{}{}
